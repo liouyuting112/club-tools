@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社團專屬工具箱 🛠️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #F4F7F6;
+            color: #333;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #43A047;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            display: block;
+            border-top: 5px solid #E0E0E0;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-top-color: #43A047;
+        }
+
+        /* Categories Colors */
+        .c-fun {
+            border-top-color: #FF4081;
+        }
+
+        .c-util {
+            border-top-color: #03A9F4;
+        }
+
+        .c-pro {
+            border-top-color: #9C27B0;
+        }
+
+        .card:hover.c-fun {
+            border-top-color: #E91E63;
+        }
+
+        .card:hover.c-util {
+            border-top-color: #0288D1;
+        }
+
+        .card:hover.c-pro {
+            border-top-color: #7B1FA2;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .desc {
+            font-size: 14px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #EEE;
+            color: #666;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .t-fun {
+            background: #FCE4EC;
+            color: #E91E63;
+        }
+
+        .t-util {
+            background: #E1F5FE;
+            color: #0288D1;
+        }
+
+        .t-pro {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ 社團專屬工具箱</h1>
+            <p>點擊下方卡片，立刻開始使用或分享給好友！</p>
+        </div>
+
+        <div class="grid">
+            <a href="購物衝動冷靜器.html" class="card c-fun">
+                <div class="tag t-fun">🤪 幹話互動</div>
+                <div class="icon">💸</div>
+                <div class="title">購物衝動冷靜器</div>
+                <div class="desc">想亂花錢？用最白癡的靈魂拷問打醒你，附帶極度嘲諷的結論。</div>
+            </a>
+
+            <a href="你今天值得吃大餐嗎.html" class="card c-fun">
+                <div class="tag t-fun">🤪 幹話互動</div>
+                <div class="icon">🍽️</div>
+                <div class="title">你配吃大餐嗎？</div>
+                <div class="desc">經歷了多少鳥事？這是一個沒有科學根據的胡說八道評估系統。</div>
+            </a>
+
+            <a href="你今天的努力換算成錢.html" class="card c-fun">
+                <div class="tag t-fun">🤪 幹話互動</div>
+                <div class="icon">💰</div>
+                <div class="title">廢人計價器</div>
+                <div class="desc">你今天的狗屁倒灶換算成錢。其實你超有價值，拿去逼老闆加薪吧！</div>
+            </a>
+
+            <a href="今天要幾點睡才不算太晚.html" class="card c-fun">
+                <div class="tag t-fun">🤪 幹話互動</div>
+                <div class="icon">🌙</div>
+                <div class="title">幾點睡才不會死</div>
+                <div class="desc">輸入你明天幾點起床，系統會精準宣告你無可救藥的命運。</div>
+            </a>
+
+            <a href="Offer比較計算機.html" class="card c-util">
+                <div class="tag t-util">📊 實用計算</div>
+                <div class="icon">⚖️</div>
+                <div class="title">Offer 比較計算機</div>
+                <div class="desc">雙欄位比較兩份工作的薪資、福利與時薪，幫你客觀做出選擇。</div>
+            </a>
+
+            <a href="寵物食物安全查詢.html" class="card c-util">
+                <div class="tag t-util">📊 實用查詢</div>
+                <div class="icon">🐾</div>
+                <div class="title">寵物食物安全查詢</div>
+                <div class="desc">內建豐富資料庫，即時查詢貓狗能不能吃，附帶安全劑量與警告。</div>
+            </a>
+
+            <a href="情侶與家人大小事小本本.html" class="card c-pro">
+                <div class="tag t-pro">📒 隱私儲存</div>
+                <div class="icon">💕</div>
+                <div class="title">大小事小本本</div>
+                <div class="desc">專屬手帳空間，不會上傳雲端，所有喜好清單存在你的手機裡。</div>
+            </a>
+
+            <a href="替死鬼連結預覽器.html" class="card c-pro">
+                <div class="tag t-pro">🛡️ 資安展示</div>
+                <div class="icon">🕵️</div>
+                <div class="title">替死鬼連結預覽器</div>
+                <div class="desc">模擬極致安全的沙箱閱覽室介面，展示釣魚網址追蹤掃描程序。</div>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>
