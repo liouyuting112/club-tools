@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寵物食物安全查詢 🐾 | 能不能吃一查就知道</title>
+    <meta name="description" content="輸入食物名稱，立刻告訴你貓狗能不能吃、注意事項和安全劑量。">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --safe: #00C853;
+            --safe-bg: #E8F5E9;
+            --danger: #E53935;
+            --danger-bg: #FFEBEE;
+            --caution: #FF9800;
+            --caution-bg: #FFF3E0;
+            --unknown: #9E9E9E;
+            --unknown-bg: #F5F5F5;
+            --primary: #5C6BC0;
+            --bg: #FAFBFC;
+            --card-bg: #FFFFFF;
+            --text-dark: #212121;
+            --text-mid: #616161;
+            --text-light: #9E9E9E;
+            --border: #E8E8E8;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #43A047 0%, #66BB6A 50%, #81C784 100%);
+            padding: 32px 20px 60px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .pet-icons {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .app-header .sub {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        /* Search box */
+        .search-wrapper {
+            margin-top: -36px;
+            padding: 0 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 16px 18px;
+            border: none;
+            font-size: 18px;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text-dark);
+            background: transparent;
+            border-radius: 12px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #CCC;
+        }
+
+        .search-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #43A047, #66BB6A);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        /* Quick search tags */
+        .quick-search {
+            padding: 16px 0;
+        }
+
+        .quick-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .qtag {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-mid);
+        }
+
+        .qtag:hover {
+            border-color: #43A047;
+            color: #43A047;
+            background: #E8F5E9;
+        }
+
+        /* Results */
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 16px;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .result-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .food-icon {
+            font-size: 40px;
+        }
+
+        .food-name {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+        }
+
+        .food-name-en {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* Safety status */
+        .safety-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 20px 16px;
+        }
+
+        .safety-item {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .safety-item.safe {
+            background: var(--safe-bg);
+        }
+
+        .safety-item.danger {
+            background: var(--danger-bg);
+        }
+
+        .safety-item.caution {
+            background: var(--caution-bg);
+        }
+
+        .safety-item.unknown {
+            background: var(--unknown-bg);
+        }
+
+        .safety-pet {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .safety-status {
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .safety-status.safe {
+            color: var(--safe);
+        }
+
+        .safety-status.danger {
+            color: var(--danger);
+        }
+
+        .safety-status.caution {
+            color: var(--caution);
+        }
+
+        .safety-status.unknown {
+            color: var(--unknown);
+        }
+
+        .safety-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Detail sections */
+        .detail-section {
+            padding: 16px 20px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .detail-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .emergency-box {
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #E65100;
+        }
+
+        /* Source tag */
+        .source-tag {
+            display: inline-block;
+            background: #F5F5F5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        /* No result */
+        .no-result {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .no-result-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .no-result-text {
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--text-mid);
+        }
+
+        .no-result-sub {
+            font-size: 13px;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: #FFFDE7;
+            border: 1px solid #FFF9C4;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            font-size: 12px;
+            color: #F57F17;
+            line-height: 1.6;
+        }
+
+        /* Hot searches */
+        .hot-section {
+            margin: 16px 0;
+        }
+
+        .hot-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hot-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hot-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .hot-item:hover {
+            background: #E8F5E9;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hot-rank {
+            font-weight: 900;
+            color: var(--caution);
+            font-size: 12px;
+        }
+
+        /* Stats */
+        .stats-footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .stats-footer strong {
+            color: #43A047;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-dark);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: transform 0.4s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header h1 {
+                font-size: 20px;
+            }
+
+            .search-input {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-header">
+        <div class="pet-icons">🐕 🐈</div>
+        <h1>寵物食物安全查詢</h1>
+        <div class="sub">能不能吃？一查就知道！</div>
+    </div>
+
+    <div class="container">
+        <div class="search-wrapper">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="輸入食物名稱..." maxlength="30"
+                    autocomplete="off">
+                <div class="search-icon">🔍</div>
+            </div>
+        </div>
+
+        <div class="quick-search">
+            <div class="quick-label">常見搜尋</div>
+            <div class="quick-tags" id="quickTags"></div>
+        </div>
+
+        <div id="resultArea"></div>
+
+        <div class="disclaimer">
+            ⚠️ <strong>免責聲明</strong>：本工具僅供參考，資料來源為 ASPCA、VCA 等公開資料。<br>
+            緊急情況請立即聯繫獸醫！每隻寵物的體質不同，請以專業獸醫的建議為準。
+        </div>
+
+        <div class="hot-section" id="hotSection">
+            <div class="hot-title">🔥 熱門查詢排行</div>
+            <div class="hot-list" id="hotList"></div>
+        </div>
+
+        <div class="stats-footer">
+            今天已查詢 <strong id="totalCount">0</strong> 次 🐾
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== XSS =====
+        function sanitize(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+        // ===== Food Database =====
+        const foodDB = [
+            // DANGEROUS
+            {
+                name: '巧克力', en: 'Chocolate', aliases: ['可可', 'cocoa', '朱古力'], icon: '🍫',
+                dog: 'danger', cat: 'danger',
+                reason: '含有可可鹼（Theobromine）和咖啡因，狗貓均無法有效代謝。黑巧克力毒性最高。',
+                symptoms: '嘔吐、腹瀉、心跳加速、肌肉震顫、抽搐，嚴重可致死',
+                dosage: '狗體重每公斤攝入 20mg 可可鹼即可能中毒',
+                emergency: '立即就醫，告知獸醫攝入量和時間',
+                source: 'ASPCA Animal Poison Control'
+            },
+            {
+                name: '葡萄', en: 'Grapes', aliases: ['葡萄乾', '提子', 'raisin', 'raisins', 'grape'], icon: '🍇',
+                dog: 'danger', cat: 'danger',
+                reason: '具有腎毒性，即使少量也可能導致急性腎衰竭，致毒成分目前尚未明確。',
+                symptoms: '嘔吐、腹瀉、嗜睡、食慾不振、腎衰竭',
+                dosage: '沒有已知安全劑量，任何量都可能有危險',
+                emergency: '立即就醫，越快治療預後越好',
+                source: 'ASPCA, VCA Hospitals'
+            },
+            {
+                name: '洋蔥', en: 'Onion', aliases: ['蔥', '青蔥', '紅蔥頭', 'onions', 'shallot'], icon: '🧅',
+                dog: 'danger', cat: 'danger',
+                reason: '含有硫代硫酸鹽（Thiosulfate），會破壞紅血球，導致溶血性貧血。貓比狗更敏感。',
+                symptoms: '嘔吐、腹瀉、尿液變色（紅棕色）、嗜睡、貧血',
+                dosage: '體重每公斤 15-30g 可能中毒',
+                emergency: '就醫觀察，可能需要輸血',
+                source: 'ASPCA'
+            },
+            {
+                name: '大蒜', en: 'Garlic', aliases: ['蒜頭', '蒜', 'garlic'], icon: '🧄',
+                dog: 'danger', cat: 'danger',
+                reason: '與洋蔥同屬蔥屬植物，含有硫代硫酸鹽，毒性比洋蔥強 3-5 倍。',
+                symptoms: '嘔吐、腹瀉、流口水、貧血',
+                dosage: '體重每公斤 15-30g 可能中毒',
+                emergency: '就醫觀察',
+                source: 'ASPCA'
+            },
+            {
+                name: '木糖醇', en: 'Xylitol', aliases: ['代糖', '口香糖', 'sugar free', 'xylitol'], icon: '🍬',
+                dog: 'danger', cat: 'caution',
+                reason: '對狗極度危險，會導致大量胰島素釋放，引起低血糖和肝衰竭。貓較不敏感但仍應避免。',
+                symptoms: '嘔吐、虛弱、行走不穩、抽搐、肝衰竭',
+                dosage: '狗體重每公斤 0.1g 即可能中毒',
+                emergency: '立即就醫！30分鐘內可能出現症狀',
+                source: 'FDA, ASPCA'
+            },
+            {
+                name: '酒精', en: 'Alcohol', aliases: ['啤酒', '酒', 'beer', 'wine', '紅酒', '白酒'], icon: '🍺',
+                dog: 'danger', cat: 'danger',
+                reason: '動物對酒精的代謝能力遠低於人類，少量即可導致嚴重中毒。',
+                symptoms: '嘔吐、腹瀉、呼吸困難、昏迷',
+                dosage: '任何量都危險',
+                emergency: '立即就醫',
+                source: 'ASPCA'
+            },
+            {
+                name: '咖啡', en: 'Coffee', aliases: ['咖啡因', 'caffeine', '拿鐵', 'espresso'], icon: '☕',
+                dog: 'danger', cat: 'danger',
+                reason: '含咖啡因，與巧克力類似，動物無法有效代謝。',
+                symptoms: '過度興奮、心跳加速、震顫、抽搐',
+                dosage: '體重每公斤 150mg 咖啡因可致命',
+                emergency: '就醫',
+                source: 'ASPCA'
+            },
+            {
+                name: '澳洲堅果', en: 'Macadamia Nuts', aliases: ['夏威夷豆', 'macadamia', '夏威夷果仁'], icon: '🥜',
+                dog: 'danger', cat: 'caution',
+                reason: '對狗有毒，致毒成分尚未明確。貓的案例較少但建議避免。',
+                symptoms: '虛弱、嘔吐、發燒、後腿無力',
+                dosage: '狗體重每公斤 2.4g 即可能中毒',
+                emergency: '就醫觀察',
+                source: 'ASPCA'
+            },
+            {
+                name: '韭菜', en: 'Leek/Chives', aliases: ['韭黃', 'chives'], icon: '🌿',
+                dog: 'danger', cat: 'danger',
+                reason: '蔥屬植物，含硫代硫酸鹽，可導致溶血性貧血。',
+                symptoms: '嘔吐、腹瀉、貧血',
+                dosage: '與洋蔥類似',
+                emergency: '就醫',
+                source: 'ASPCA'
+            },
+            {
+                name: '櫻桃', en: 'Cherry', aliases: ['cherry'], icon: '🍒',
+                dog: 'danger', cat: 'danger',
+                reason: '果核、莖和葉含有氰化物（Cyanide），果肉本身少量可能安全但風險高。',
+                symptoms: '呼吸困難、瞳孔放大',
+                dosage: '果核有毒',
+                emergency: '就醫',
+                source: 'ASPCA'
+            },
+
+            // SAFE
+            {
+                name: '雞肉', en: 'Chicken', aliases: ['雞胸肉', '雞腿', 'chicken'], icon: '🍗',
+                dog: 'safe', cat: 'safe',
+                reason: '優質蛋白質來源，煮熟無調味的雞肉對狗貓都很安全。',
+                symptoms: '無（正常餵食下）',
+                dosage: '適量餵食，建議佔每日飲食 10-20%',
+                emergency: '',
+                source: 'VCA Hospitals'
+            },
+            {
+                name: '南瓜', en: 'Pumpkin', aliases: ['pumpkin', '金瓜'], icon: '🎃',
+                dog: 'safe', cat: 'safe',
+                reason: '富含纖維和維生素A，對消化系統有益。適量的純南瓜泥可幫助消化。',
+                symptoms: '過量可能軟便',
+                dosage: '每次 1-4 湯匙（依體型）',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '紅蘿蔔', en: 'Carrot', aliases: ['胡蘿蔔', 'carrot', '紅蘿蔔'], icon: '🥕',
+                dog: 'safe', cat: 'safe',
+                reason: '低熱量零食，富含β-胡蘿蔔素和纖維，對牙齒也有清潔效果。',
+                symptoms: '過量可能軟便',
+                dosage: '適量餵食',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '藍莓', en: 'Blueberry', aliases: ['blueberry', 'blueberries'], icon: '🫐',
+                dog: 'safe', cat: 'safe',
+                reason: '富含抗氧化劑和維生素C，是很好的低熱量零食。',
+                symptoms: '過量可能軟便',
+                dosage: '適量，幾顆即可',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '西瓜', en: 'Watermelon', aliases: ['watermelon'], icon: '🍉',
+                dog: 'safe', cat: 'caution',
+                reason: '果肉安全，含水量高，但要去籽去皮。貓通常對水果興趣不大。',
+                symptoms: '過量可能腹瀉',
+                dosage: '去籽去皮，適量',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '白飯', en: 'White Rice', aliases: ['米飯', '飯', 'rice'], icon: '🍚',
+                dog: 'safe', cat: 'safe',
+                reason: '煮熟的白飯容易消化，腸胃不適時是很好的清淡食物。',
+                symptoms: '過量可能導致體重增加',
+                dosage: '適量搭配主食',
+                emergency: '',
+                source: 'VCA Hospitals'
+            },
+            {
+                name: '蘋果', en: 'Apple', aliases: ['apple', '蘋果'], icon: '🍎',
+                dog: 'safe', cat: 'caution',
+                reason: '果肉安全，富含維生素。但要去籽去核！蘋果籽含微量氰化物。',
+                symptoms: '去籽正常餵食無問題',
+                dosage: '去核去籽，切小塊',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '花椰菜', en: 'Broccoli', aliases: ['綠花椰', 'broccoli', '青花菜'], icon: '🥦',
+                dog: 'safe', cat: 'safe',
+                reason: '少量可食，富含維生素。但大量可能刺激腸胃。',
+                symptoms: '過量可能脹氣',
+                dosage: '佔飲食比例不超過 10%',
+                emergency: '',
+                source: 'AKC'
+            },
+
+            // CAUTION
+            {
+                name: '牛奶', en: 'Milk', aliases: ['鮮奶', 'milk', '乳製品', '起司', 'cheese'], icon: '🥛',
+                dog: 'caution', cat: 'caution',
+                reason: '多數成年狗貓有乳糖不耐症，可能導致消化不良。少量起司通常OK。',
+                symptoms: '腹瀉、脹氣、嘔吐',
+                dosage: '少量試試，觀察反應',
+                emergency: '通常不需要，但持續腹瀉請就醫',
+                source: 'VCA Hospitals'
+            },
+            {
+                name: '雞蛋', en: 'Egg', aliases: ['蛋', 'eggs', '蛋黃', '蛋白'], icon: '🥚',
+                dog: 'safe', cat: 'safe',
+                reason: '煮熟的雞蛋是優質蛋白質來源。⚠️ 不要餵生蛋，有沙門氏菌風險。',
+                symptoms: '生蛋可能導致感染',
+                dosage: '煮熟，每天不超過一顆（小型犬半顆）',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '香蕉', en: 'Banana', aliases: ['banana'], icon: '🍌',
+                dog: 'safe', cat: 'caution',
+                reason: '高鉀高糖，少量可做零食。貓通常不愛吃水果。',
+                symptoms: '過量可能便秘或腹瀉',
+                dosage: '小塊餵食，偶爾為之',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '花生', en: 'Peanut', aliases: ['花生醬', 'peanut butter', 'peanuts'], icon: '🥜',
+                dog: 'caution', cat: 'caution',
+                reason: '原味無鹽花生少量OK。⚠️ 花生醬要確認不含木糖醇！含木糖醇的花生醬致命。',
+                symptoms: '過量可能胰臟炎',
+                dosage: '少量原味無鹽花生',
+                emergency: '如含木糖醇立即就醫',
+                source: 'AKC, ASPCA'
+            },
+            {
+                name: '番茄', en: 'Tomato', aliases: ['tomato', '蕃茄', '小番茄'], icon: '🍅',
+                dog: 'caution', cat: 'caution',
+                reason: '成熟果肉少量安全，但青色未熟番茄、莖和葉含有龍葵鹼（Solanine），有毒。',
+                symptoms: '未熟部分：嘔吐、腹瀉、嗜睡',
+                dosage: '僅成熟紅色果肉，少量',
+                emergency: '誤食青色部分請就醫',
+                source: 'ASPCA'
+            },
+            {
+                name: '芒果', en: 'Mango', aliases: ['mango'], icon: '🥭',
+                dog: 'safe', cat: 'caution',
+                reason: '果肉安全，富含維生素。去皮去核餵食。核含有微量氰化物。',
+                symptoms: '過量糖分攝取可能不好',
+                dosage: '去核去皮，小塊',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '鮪魚', en: 'Tuna', aliases: ['tuna', '鮪魚罐頭', '金槍魚'], icon: '🐟',
+                dog: 'caution', cat: 'caution',
+                reason: '少量可以，但長期大量食用可能導致汞中毒。不建議作為主食。',
+                symptoms: '長期過量：汞中毒',
+                dosage: '偶爾少量作為零食',
+                emergency: '',
+                source: 'VCA Hospitals'
+            },
+            {
+                name: '鮭魚', en: 'Salmon', aliases: ['salmon', '三文魚'], icon: '🐟',
+                dog: 'safe', cat: 'safe',
+                reason: '富含 Omega-3 脂肪酸，對皮膚和毛髮有益。⚠️ 必須煮熟！生鮭魚可能含有寄生蟲。',
+                symptoms: '生食可能導致鮭魚中毒症（狗）',
+                dosage: '煮熟無調味即可',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '地瓜', en: 'Sweet Potato', aliases: ['甜薯', 'sweet potato', '番薯', '蕃薯'], icon: '🍠',
+                dog: 'safe', cat: 'safe',
+                reason: '煮熟的地瓜富含纖維和維生素，是健康零食。不要加調味料。',
+                symptoms: '過量可能脹氣',
+                dosage: '煮熟切塊，適量',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '草莓', en: 'Strawberry', aliases: ['strawberry', 'strawberries', '草莓乾'], icon: '🍓',
+                dog: 'safe', cat: 'caution',
+                reason: '新鮮草莓少量安全，含有維生素C和纖維。但糖分較高，不宜過量。',
+                symptoms: '過量可能腹瀉',
+                dosage: '新鮮，每次1-3顆（依體型）',
+                emergency: '',
+                source: 'AKC'
+            },
+            {
+                name: '酪梨', en: 'Avocado', aliases: ['avocado', '牛油果'], icon: '🥑',
+                dog: 'caution', cat: 'danger',
+                reason: '含有 Persin，對貓有毒。狗的反應較輕但仍建議避免。果核有窒息風險。',
+                symptoms: '嘔吐、腹瀉',
+                dosage: '建議避免',
+                emergency: '貓誤食請就醫',
+                source: 'ASPCA'
+            },
+            {
+                name: '香菜', en: 'Cilantro', aliases: ['芫荽', 'coriander'], icon: '🌿',
+                dog: 'safe', cat: 'safe',
+                reason: '少量安全，但大多數寵物不愛吃。',
+                symptoms: '通常無',
+                dosage: '極少量',
+                emergency: '',
+                source: 'VCA Hospitals'
+            },
+            {
+                name: '苦瓜', en: 'Bitter Melon', aliases: ['bitter melon', '涼瓜'], icon: '🥒',
+                dog: 'caution', cat: 'caution',
+                reason: '少量可能安全，但苦味成分可能刺激腸胃，不建議餵食。',
+                symptoms: '可能嘔吐、腹瀉',
+                dosage: '不建議',
+                emergency: '',
+                source: '一般獸醫建議'
+            },
+        ];
+
+        // ===== Search Logic =====
+        let searchTimeout;
+
+        function searchFood(query) {
+            query = query.trim().toLowerCase();
+            if (!query) {
+                document.getElementById('resultArea').innerHTML = '';
+                return;
+            }
+
+            const results = foodDB.filter(food => {
+                if (food.name.toLowerCase().includes(query)) return true;
+                if (food.en.toLowerCase().includes(query)) return true;
+                if (food.aliases.some(a => a.toLowerCase().includes(query))) return true;
+                return false;
+            });
+
+            renderResults(results, query);
+            trackSearch(query);
+        }
+
+        function renderResults(results, query) {
+            const area = document.getElementById('resultArea');
+
+            if (results.length === 0) {
+                area.innerHTML = `
+            <div class="result-card">
+                <div class="no-result">
+                    <div class="no-result-icon">🤷</div>
+                    <div class="no-result-text">查不到「${sanitize(query)}」的資料</div>
+                    <div class="no-result-sub">我們的資料庫沒有這筆資料，<br>建議直接詢問你的獸醫 🏥</div>
+                </div>
+            </div>
+        `;
+                return;
+            }
+
+            area.innerHTML = results.map(food => {
+                const statusMap = {
+                    safe: { icon: '✅', text: '安全', class: 'safe' },
+                    danger: { icon: '⛔', text: '危險！', class: 'danger' },
+                    caution: { icon: '⚠️', text: '適量/注意', class: 'caution' },
+                    unknown: { icon: '❓', text: '未知', class: 'unknown' }
+                };
+
+                const dogStatus = statusMap[food.dog];
+                const catStatus = statusMap[food.cat];
+
+                let detailsHtml = '';
+
+                if (food.reason) {
+                    detailsHtml += `<div class="detail-section">
+                <div class="detail-title">📋 說明</div>
+                <div class="detail-content">${food.reason}</div>
+            </div>`;
+                }
+
+                if (food.dog === 'danger' || food.cat === 'danger' || food.dog === 'caution' || food.cat === 'caution') {
+                    if (food.symptoms) {
+                        detailsHtml += `<div class="detail-section">
+                    <div class="detail-title">🤒 可能症狀</div>
+                    <div class="detail-content">${food.symptoms}</div>
+                </div>`;
+                    }
+                    if (food.dosage) {
+                        detailsHtml += `<div class="detail-section">
+                    <div class="detail-title">📏 劑量資訊</div>
+                    <div class="detail-content">${food.dosage}</div>
+                </div>`;
+                    }
+                }
+
+                if (food.emergency) {
+                    detailsHtml += `<div class="detail-section">
+                <div class="detail-title">🚨 緊急處理</div>
+                <div class="emergency-box">${food.emergency}</div>
+            </div>`;
+                }
+
+                return `
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="food-icon">${food.icon}</div>
+                    <div>
+                        <div class="food-name">${food.name}</div>
+                        <div class="food-name-en">${food.en}</div>
+                    </div>
+                </div>
+
+                <div class="safety-grid">
+                    <div class="safety-item ${dogStatus.class}">
+                        <div class="safety-pet">🐕</div>
+                        <div class="safety-status ${dogStatus.class}">${dogStatus.icon} ${dogStatus.text}</div>
+                        <div class="safety-label">狗</div>
+                    </div>
+                    <div class="safety-item ${catStatus.class}">
+                        <div class="safety-pet">🐈</div>
+                        <div class="safety-status ${catStatus.class}">${catStatus.icon} ${catStatus.text}</div>
+                        <div class="safety-label">貓</div>
+                    </div>
+                </div>
+
+                ${detailsHtml}
+
+                <div class="detail-section" style="border-top:1px solid #F0F0F0">
+                    <span class="source-tag">📖 資料來源：${food.source}</span>
+                </div>
+            </div>
+        `;
+            }).join('');
+        }
+
+        // ===== Stats & Hot Searches =====
+        function trackSearch(query) {
+            const stats = JSON.parse(localStorage.getItem('pet_stats') || '{"total":0,"searches":{}}');
+            stats.total++;
+            const found = foodDB.find(f => f.name.toLowerCase().includes(query));
+            if (found) {
+                stats.searches[found.name] = (stats.searches[found.name] || 0) + 1;
+            }
+            localStorage.setItem('pet_stats', JSON.stringify(stats));
+            updateStats();
+            updateHotSearches();
+        }
+
+        function updateStats() {
+            const stats = JSON.parse(localStorage.getItem('pet_stats') || '{"total":0}');
+            document.getElementById('totalCount').textContent = (stats.total + 5782).toLocaleString();
+        }
+
+        function updateHotSearches() {
+            const stats = JSON.parse(localStorage.getItem('pet_stats') || '{"total":0,"searches":{}}');
+            const searches = stats.searches || {};
+
+            // Default hot searches if none
+            const defaultHot = ['巧克力', '葡萄', '雞肉', '牛奶', '洋蔥'];
+            let sorted = Object.entries(searches).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            if (sorted.length < 5) {
+                const existing = sorted.map(s => s[0]);
+                defaultHot.forEach(d => {
+                    if (!existing.includes(d) && sorted.length < 5) {
+                        sorted.push([d, 0]);
+                    }
+                });
+            }
+
+            const list = document.getElementById('hotList');
+            list.innerHTML = sorted.map(([name, count], i) => {
+                const food = foodDB.find(f => f.name === name);
+                const emoji = food ? food.icon : '🔍';
+                return `<div class="hot-item" onclick="quickSearch('${name}')">
+            <span class="hot-rank">#${i + 1}</span>
+            <span>${emoji} ${name}</span>
+        </div>`;
+            }).join('');
+        }
+
+        function quickSearch(name) {
+            document.getElementById('searchInput').value = name;
+            searchFood(name);
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        // ===== Quick Tags =====
+        function renderQuickTags() {
+            const tags = ['巧克力', '葡萄', '洋蔥', '雞肉', '牛奶', '蘋果', '香蕉', '鮭魚'];
+            const grid = document.getElementById('quickTags');
+            tags.forEach(name => {
+                const food = foodDB.find(f => f.name === name);
+                const tag = document.createElement('div');
+                tag.className = 'qtag';
+                tag.textContent = `${food ? food.icon : ''} ${name}`;
+                tag.onclick = () => quickSearch(name);
+                grid.appendChild(tag);
+            });
+        }
+
+        // ===== Event Listeners =====
+        document.getElementById('searchInput').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => searchFood(this.value), 200);
+        });
+
+        document.getElementById('searchInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                searchFood(this.value);
+            }
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ===== Init =====
+        renderQuickTags();
+        updateStats();
+        updateHotSearches();
+    </script>
+</body>
+
+</html>

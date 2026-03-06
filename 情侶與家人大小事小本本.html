@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情侶 & 家人大小事小本本 📒</title>
+    <meta name="description" content="記錄重要的人的喜好與地雷的專屬小本本。">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-butter: #FFFDF5;
+            --coral-pink: #FF85A2;
+            --matcha-green: #9CB495;
+            --orange: #FFB06A;
+            --blue: #8AB8D4;
+            --text-dark: #4A4A4A;
+            --text-mid: #7A7A7A;
+            --border: #E8E0D5;
+            --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background: var(--bg-butter);
+            background-image: radial-gradient(#E8E0D5 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Nav Header */
+        .app-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 253, 245, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px dashed var(--border);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .space-code {
+            font-size: 13px;
+            font-family: 'Nunito', monospace;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            color: var(--coral-pink);
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Welcome View */
+        .welcome-box {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            margin-top: 40px;
+            border: 2px solid var(--border);
+        }
+
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .welcome-box h1 {
+            font-size: 24px;
+            color: var(--coral-pink);
+            margin-bottom: 8px;
+        }
+
+        .welcome-box p {
+            font-size: 15px;
+            color: var(--text-mid);
+            margin-bottom: 24px;
+        }
+
+        .input-code {
+            width: 100%;
+            padding: 14px;
+            text-align: center;
+            font-size: 20px;
+            letter-spacing: 4px;
+            font-family: 'Nunito', monospace;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .input-code:focus {
+            outline: none;
+            border-color: var(--coral-pink);
+        }
+
+        /* People List View */
+        .search-bar {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 20px;
+            border: 2px solid white;
+            background: white;
+            box-shadow: var(--card-shadow);
+            font-size: 15px;
+            margin-bottom: 20px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--matcha-green);
+        }
+
+        .people-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .person-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .person-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .person-avatar {
+            width: 64px;
+            height: 64px;
+            background: #F5F5F5;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .person-name {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .person-bday {
+            font-size: 12px;
+            color: var(--text-mid);
+        }
+
+        .relation-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+        }
+
+        /* Relation Colors */
+        .rel-partner .relation-border {
+            background: var(--coral-pink);
+        }
+
+        .rel-partner .person-avatar {
+            background: rgba(255, 133, 162, 0.1);
+        }
+
+        .rel-family .relation-border {
+            background: var(--orange);
+        }
+
+        .rel-family .person-avatar {
+            background: rgba(255, 176, 106, 0.1);
+        }
+
+        .rel-pet .relation-border {
+            background: var(--matcha-green);
+        }
+
+        .rel-pet .person-avatar {
+            background: rgba(156, 180, 149, 0.1);
+        }
+
+        .rel-friend .relation-border {
+            background: var(--blue);
+        }
+
+        .rel-friend .person-avatar {
+            background: rgba(138, 184, 212, 0.1);
+        }
+
+        .add-person-card {
+            background: transparent;
+            border: 2px dashed var(--matcha-green);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--matcha-green);
+            padding: 20px;
+        }
+
+        .add-person-card:hover {
+            background: rgba(156, 180, 149, 0.1);
+            border-style: solid;
+        }
+
+        /* Detail View */
+        .detail-header {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-mid);
+        }
+
+        .detail-avatar {
+            font-size: 56px;
+            margin: 12px 0;
+            display: inline-block;
+        }
+
+        .detail-name {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .detail-relation {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .rel-partner .detail-relation {
+            background: rgba(255, 133, 162, 0.15);
+            color: var(--coral-pink);
+        }
+
+        .rel-family .detail-relation {
+            background: rgba(255, 176, 106, 0.15);
+            color: var(--orange);
+        }
+
+        .rel-pet .detail-relation {
+            background: rgba(156, 180, 149, 0.15);
+            color: var(--matcha-green);
+        }
+
+        /* Facts List */
+        .fact-section {
+            margin-bottom: 24px;
+        }
+
+        .fact-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .fact-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .fact-card.like {
+            border-left: 4px solid var(--coral-pink);
+        }
+
+        .fact-card.dislike {
+            border-left: 4px solid var(--text-mid);
+            opacity: 0.9;
+        }
+
+        .fact-card.date {
+            border-left: 4px solid var(--orange);
+        }
+
+        .fact-card.note {
+            border-left: 4px solid var(--blue);
+        }
+
+        .fact-icon {
+            font-size: 20px;
+        }
+
+        .fact-content {
+            flex: 1;
+        }
+
+        .fact-text {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .fact-meta {
+            font-size: 12px;
+            color: var(--text-mid);
+        }
+
+        .fact-delete {
+            background: none;
+            border: none;
+            color: #CCC;
+            cursor: pointer;
+        }
+
+        .fact-delete:hover {
+            color: var(--coral-pink);
+        }
+
+        /* Add Fact Form */
+        .add-fact-box {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 2px dashed var(--border);
+            margin-top: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-pink {
+            background: var(--coral-pink);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.3);
+        }
+
+        .btn-pink:hover {
+            background: #ff7596;
+        }
+
+        .btn-green {
+            background: var(--matcha-green);
+            color: white;
+            box-shadow: 0 4px 12px rgba(156, 180, 149, 0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        /* Local warning */
+        .local-warning {
+            background: rgba(255, 176, 106, 0.1);
+            border: 1px dashed var(--orange);
+            color: #D37400;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            z-index: 1000;
+            transition: transform 0.4s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="app-header" id="appHeader" style="display:none">
+            <div class="header-title">📒 小本本</div>
+            <div class="space-code" id="spaceCodeBtn" onclick="copySpaceCode()">邀請碼：---</div>
+        </div>
+
+        <!-- View 1: Welcome -->
+        <div class="view active" id="viewWelcome">
+            <div class="local-warning">
+                ⚠️ <b>單機展示版說明</b><br>
+                所有資料均儲存於您的瀏覽器中 (localStorage)，<br>建立空間或輸入任意 6 碼即可開始使用。
+            </div>
+
+            <div class="welcome-box">
+                <div class="welcome-icon">📒</div>
+                <h1>大小事小本本</h1>
+                <p>重要的人的喜好，都有好好記著嗎？</p>
+
+                <button class="btn btn-pink" onclick="createSpace()" style="margin-bottom: 24px;">✨ 建立新小本本</button>
+
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom: 24px;">
+                    <hr style="flex:1; border:none; border-top:1px solid var(--border)">
+                    <span style="font-size:12px; color:var(--text-mid)">或加入現有包廂</span>
+                    <hr style="flex:1; border:none; border-top:1px solid var(--border)">
+                </div>
+
+                <input type="text" class="input-code" id="inviteCode" placeholder="輸入6碼邀請碼" maxlength="6">
+                <button class="btn btn-outline" onclick="joinSpace()">進入小本本</button>
+            </div>
+        </div>
+
+        <!-- View 2: List -->
+        <div class="view" id="viewList">
+            <input type="text" class="search-bar" id="searchBar" placeholder="🔍 搜尋你想找的人、或喜歡的東西..."
+                oninput="filterList()">
+
+            <div class="people-grid" id="peopleGrid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- View 3: Person Detail -->
+        <div class="view" id="viewDetail">
+            <div class="detail-header" id="detailHeader">
+                <button class="back-btn" onclick="showView('List')">←</button>
+                <div class="relation-border"></div>
+                <div class="detail-avatar" id="dAvatar">👱‍♀️</div>
+                <div class="detail-name" id="dName">名稱</div>
+                <div class="detail-relation" id="dRelation">另一半</div>
+            </div>
+
+            <div id="factsContainer">
+                <!-- Facts list -->
+            </div>
+
+            <div class="add-fact-box">
+                <h4 style="margin-bottom:12px; font-size:14px;">📝 記下一筆</h4>
+                <div class="input-group">
+                    <select id="factTag">
+                        <option value="like">❤️ 喜歡的東西</option>
+                        <option value="dislike">🚫 討厭/不吃/雷點</option>
+                        <option value="date">📅 紀念日/生日</option>
+                        <option value="note">📝 其他備註</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="factText" placeholder="例：草莓乾、會對香菜過敏..." autocomplete="off">
+                </div>
+                <button class="btn btn-green" onclick="addFact()">💾 記進本子</button>
+            </div>
+        </div>
+
+        <!-- View 4: Add Person -->
+        <div class="view" id="viewAddPerson">
+            <div class="welcome-box" style="margin-top:0;">
+                <button class="back-btn"
+                    style="position:relative;top:0;left:0;float:left;margin-top:-10px;margin-left:-10px;"
+                    onclick="showView('List')">←</button>
+                <h2>新增人物</h2>
+                <br>
+                <div class="input-group">
+                    <input type="text" id="newEmoji" placeholder="選擇Emoji頭像 (例: 🐱)" value="👩" maxlength="2"
+                        style="font-size:24px;text-align:center;">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="newName" placeholder="姓名/暱稱">
+                </div>
+                <div class="input-group">
+                    <select id="newRel">
+                        <option value="partner">另一半</option>
+                        <option value="family">家人</option>
+                        <option value="pet">寵物</option>
+                        <option value="friend">朋友</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="newBday" placeholder="生日 (例: 05/14) 選填">
+                </div>
+                <button class="btn btn-pink" onclick="savePerson()" style="margin-top:12px;">✅ 建立卡片</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== Default Data =====
+        let currentSpace = null;
+        let currentPersonId = null;
+
+        const DEMO_DATA = {
+            code: 'DEMO66',
+            people: [
+                {
+                    id: 1, name: '媽咪', emoji: '👩', rel: 'family', bday: '05/14', facts: [
+                        { id: 101, tag: 'like', text: '草莓乾、芋頭蛋糕', by: 'Me' },
+                        { id: 102, tag: 'dislike', text: '太甜的東西', by: 'Me' }
+                    ]
+                },
+                {
+                    id: 2, name: '陳小美', emoji: '👧', rel: 'partner', bday: '12/25', facts: [
+                        { id: 201, tag: 'like', text: '奶茶微糖微冰', by: 'Me' },
+                        { id: 202, tag: 'dislike', text: '討厭等待，會生氣', by: 'Me' },
+                        { id: 203, tag: 'date', text: '在一起那一天 (08/01)', by: 'Me' }
+                    ]
+                },
+                {
+                    id: 3, name: '胖橘', emoji: '😺', rel: 'pet', bday: '', facts: [
+                        { id: 301, tag: 'like', text: '汪喵星球鮪魚凍乾', by: 'Me' }
+                    ]
+                }
+            ]
+        };
+
+        // ===== DB Logic (localStorage) =====
+        function getDB() {
+            return JSON.parse(localStorage.getItem('notebook_db') || '{}');
+        }
+
+        function saveDB(db) {
+            localStorage.setItem('notebook_db', JSON.stringify(db));
+        }
+
+        function getSpace(code) {
+            const db = getDB();
+            if (!db[code] && code === 'DEMO66') {
+                db[code] = DEMO_DATA;
+                saveDB(db);
+            }
+            return db[code] || null;
+        }
+
+        // ===== Actions =====
+        function createSpace() {
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const db = getDB();
+            db[code] = { code, people: [] };
+            saveDB(db);
+            loadSpace(code);
+        }
+
+        function joinSpace() {
+            const code = document.getElementById('inviteCode').value.toUpperCase().trim();
+            if (code.length < 5) { showToast('請輸入正確的邀請碼'); return; }
+
+            const db = getDB();
+            if (!db[code]) {
+                // If not exist, just create it for local demo
+                db[code] = { code, people: [] };
+                saveDB(db);
+                showToast('找不到此空間，已為您新建一個！');
+            }
+            loadSpace(code);
+        }
+
+        function loadSpace(code) {
+            currentSpace = code;
+            document.getElementById('appHeader').style.display = 'flex';
+            document.getElementById('spaceCodeBtn').textContent = `邀請碼：${code}`;
+            renderList();
+            showView('List');
+        }
+
+        // ===== Rendering =====
+        const relTextMap = { partner: '另一半', family: '家人', pet: '寵物', friend: '朋友' };
+
+        function renderList(query = '') {
+            const space = getSpace(currentSpace);
+            const grid = document.getElementById('peopleGrid');
+
+            let html = '';
+            const people = space.people.filter(p => {
+                if (!query) return true;
+                const q = query.toLowerCase();
+                if (p.name.toLowerCase().includes(q)) return true;
+                return p.facts.some(f => f.text.toLowerCase().includes(q));
+            });
+
+            people.forEach(p => {
+                html += `
+            <div class="person-card rel-${p.rel}" onclick="openPerson(${p.id})">
+                <div class="relation-border"></div>
+                <div class="person-avatar">${p.emoji}</div>
+                <div class="person-name">${sanitize(p.name)}</div>
+                <div class="person-bday">${p.bday ? '🎂 ' + sanitize(p.bday) : '&nbsp;'}</div>
+            </div>
+        `;
+            });
+
+            html += `
+        <div class="person-card add-person-card" onclick="showView('AddPerson')">
+            <div style="font-size:32px;margin-bottom:8px">＋</div>
+            <div style="font-weight:700">新增人物</div>
+        </div>
+    `;
+
+            grid.innerHTML = html;
+        }
+
+        function filterList() {
+            const q = document.getElementById('searchBar').value;
+            renderList(q);
+        }
+
+        function openPerson(id) {
+            currentPersonId = id;
+            const space = getSpace(currentSpace);
+            const p = space.people.find(x => x.id === id);
+
+            const header = document.getElementById('detailHeader');
+            header.className = `detail-header rel-${p.rel}`;
+            document.getElementById('dAvatar').textContent = p.emoji;
+            document.getElementById('dName').textContent = sanitize(p.name);
+            document.getElementById('dRelation').textContent = relTextMap[p.rel];
+
+            renderFacts(p);
+            document.getElementById('factText').value = '';
+            showView('Detail');
+        }
+
+        function renderFacts(person) {
+            const types = [
+                { key: 'like', icon: '❤️', label: '喜歡' },
+                { key: 'dislike', icon: '🚫', label: '不喜歡 / 地雷' },
+                { key: 'date', icon: '📅', label: '重要日期' },
+                { key: 'note', icon: '📝', label: '備註' }
+            ];
+
+            let html = '';
+            types.forEach(t => {
+                const facts = person.facts.filter(f => f.tag === t.key);
+                if (facts.length > 0) {
+                    html += `<div class="fact-section">
+                <div class="fact-title">${t.icon} ${t.label}</div>
+                <div class="fact-list">
+                    ${facts.map(f => `
+                        <div class="fact-card ${t.key}">
+                            <div class="fact-content">
+                                <div class="fact-text">${sanitize(f.text)}</div>
+                            </div>
+                            <button class="fact-delete" onclick="deleteFact(${f.id})">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+                }
+            });
+
+            if (person.facts.length === 0) {
+                html = '<div style="text-align:center;color:#999;font-size:14px;margin-bottom:24px;">還沒有記錄任何事情喔，趕快往下新增吧！</div>';
+            }
+
+            document.getElementById('factsContainer').innerHTML = html;
+        }
+
+        function addFact() {
+            const text = document.getElementById('factText').value.trim();
+            if (!text) return;
+            const tag = document.getElementById('factTag').value;
+
+            const db = getDB();
+            const p = db[currentSpace].people.find(x => x.id === currentPersonId);
+
+            p.facts.push({
+                id: Date.now(),
+                tag: tag,
+                text: text,
+                by: 'Me'
+            });
+
+            saveDB(db);
+            document.getElementById('factText').value = '';
+            openPerson(currentPersonId);
+            showToast('已記下！📝');
+        }
+
+        function deleteFact(factId) {
+            if (!confirm('確定要刪除這筆記錄嗎？')) return;
+            const db = getDB();
+            const p = db[currentSpace].people.find(x => x.id === currentPersonId);
+            p.facts = p.facts.filter(f => f.id !== factId);
+            saveDB(db);
+            openPerson(currentPersonId);
+        }
+
+        function savePerson() {
+            const emoji = document.getElementById('newEmoji').value || '👩';
+            const name = document.getElementById('newName').value.trim();
+            const rel = document.getElementById('newRel').value;
+            const bday = document.getElementById('newBday').value.trim();
+
+            if (!name) { showToast('請輸入姓名'); return; }
+
+            const db = getDB();
+            db[currentSpace].people.push({
+                id: Date.now(), emoji, name, rel, bday, facts: []
+            });
+
+            saveDB(db);
+
+            // Clear
+            document.getElementById('newName').value = '';
+            document.getElementById('newBday').value = '';
+
+            renderList();
+            showView('List');
+            showToast('人物卡片建立成功！✨');
+        }
+
+        // ===== Utils =====
+        function showView(name) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view${name}`).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function copySpaceCode() {
+            navigator.clipboard.writeText(currentSpace).then(() => {
+                showToast('邀請碼已複製！快貼給家人伴侶 📋');
+            });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function sanitize(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+        // If first time, setup demo
+        if (!getSpace('DEMO66')) {
+            const db = getDB();
+            db['DEMO66'] = DEMO_DATA;
+            saveDB(db);
+        }
+    </script>
+</body>
+
+</html>

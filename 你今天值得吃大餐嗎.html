@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你今天值得吃大餐嗎？🍽️ | 荒唐評估系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #D4A853;
+            --dark: #1A1A2E;
+            --text: #E8E8E8;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #16213E;
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            color: var(--gold);
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--gold);
+        }
+
+        .tags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid #555;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tag.selected {
+            background: rgba(212, 168, 83, 0.2);
+            border-color: var(--gold);
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            background: var(--gold);
+            color: #000;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-title {
+            font-size: 32px;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-text {
+            font-size: 18px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ 你今天值得吃大餐嗎？</h1>
+            <p>這是一個沒有科學根據的胡說八道系統</p>
+        </div>
+
+        <div id="step1" class="card">
+            <h3 style="margin-bottom: 16px;">勾選你今天經歷過的鳥事：</h3>
+            <div class="tags-grid" id="tags"></div>
+            <button class="btn" onclick="calc()">算算我配不配吃東西</button>
+        </div>
+
+        <div id="step2" class="card hidden">
+            <div class="result-title" id="stars"></div>
+            <h2 style="text-align:center; color: var(--gold); margin-bottom: 20px;" id="ratingName"></h2>
+            <div class="result-text" id="desc"></div>
+            <button class="btn" onclick="share()">📣 把這份恥辱分享出去</button>
+            <button class="btn" onclick="location.reload()"
+                style="background: transparent; border: 2px solid var(--gold); color: var(--gold);">🔄 再瞎掰一次</button>
+        </div>
+    </div>
+    <div class="toast" id="toast">已複製，快去貼給朋友笑！</div>
+
+    <script>
+        const tags = [
+            { t: '呼吸了超過 100 次', s: 1 },
+            { t: '成功把垃圾丟進垃圾桶', s: 2 },
+            { t: '假排隊真滑手機', s: -1 },
+            { t: '被路邊的黑狗狂吠', s: 3 },
+            { t: '差點跌倒但裝作在跳舞', s: 4 },
+            { t: '偷看前任限動', s: -2 },
+            { t: '在老闆背後瘋狂翻白眼', s: 5 },
+            { t: '深情地望著天花板發呆', s: 1 },
+            { t: '成功憋住了一個超響的屁', s: 5 },
+            { t: '喝水莫名其妙嗆到', s: 2 },
+            { t: '今天什麼都沒做，只管活著', s: -5 }
+        ];
+
+        let selected = new Set();
+        const tg = document.getElementById('tags');
+        tags.forEach((tag, i) => {
+            let el = document.createElement('div');
+            el.className = 'tag'; el.textContent = tag.t;
+            el.onclick = () => {
+                if (selected.has(i)) { selected.delete(i); el.classList.remove('selected'); }
+                else { selected.add(i); el.classList.add('selected'); }
+            };
+            tg.appendChild(el);
+        });
+
+        function calc() {
+            if (selected.size === 0) return alert('你連點個按鈕都懶，活該吃土！');
+            let s = 0; selected.forEach(i => s += tags[i].s);
+            let r = {};
+            if (s < 0) r = { stars: '⭐ 負一萬星', name: '吸空氣大師', txt: '你今天的努力只夠在路邊喝西北風。\n去巷口便利商店買個即期御飯糰，還不准請店員加熱。你的細胞都在為你感到羞恥。' };
+            else if (s < 5) r = { stars: '⭐⭐ 半顆星', name: '平庸的卵石', txt: '你成功扮演了一個路人甲！表現平淡無奇，非常適合吃一碗加了滷蛋的陽春麵。\n記住，滷蛋不能切，這是你今天最大的奢侈。' };
+            else if (s < 10) r = { stars: '⭐⭐⭐⭐ 四星', name: '苟延殘喘の戰士', txt: '天哪，經歷了這些鳥事你竟然還活著！這簡直是醫學奇蹟！\n這點委屈不吃個火鍋怎麼對得起自己？吃！都吃！讓卡路里撫慰你的靈魂！' };
+            else r = { stars: '🌟🌟🌟🌟🌟 爆裂五星', name: '拯救宇宙的英雄', txt: '太誇張了，你今天根本是超人！地球沒有爆炸都是因為你在撐著！\n去吃和牛吃到飽！今晚就算刷爆信用卡，就算明天破產，你也值得這一切榮耀！' };
+
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('stars').textContent = r.stars;
+            document.getElementById('ratingName').textContent = r.name;
+            document.getElementById('desc').innerHTML = r.txt.replace(/\n/g, '<br>');
+
+            window.resText = `🍽️ 【大餐資格評估局】\n\n我的今日防禦力：${r.name}\n系統判斷：${r.txt.replace(/\n/g, ' ')}\n\n👉 誰請我吃一頓：[請貼上工具網址]`;
+        }
+
+        function share() {
+            navigator.clipboard.writeText(window.resText).then(() => {
+                const t = document.getElementById('toast');
+                t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>

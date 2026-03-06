@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer 比較計算機 💼 | 幫你做理性決策</title>
+    <meta name="description" content="輸入兩份工作 Offer 的條件，自動計算實際差距，用數據幫你做理性選擇。">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #F0F2F5;
+            --primary: #4361EE;
+            --primary-light: #7B8FF5;
+            --primary-dark: #3250DB;
+            --secondary: #FF6B6B;
+            --success: #06D6A0;
+            --warning: #FFD166;
+            --card-bg: #FFFFFF;
+            --text-dark: #1A1A2E;
+            --text-mid: #555;
+            --text-light: #999;
+            --border: #E0E0E0;
+            --offer-a: #4361EE;
+            --offer-b: #FF6B6B;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            padding: 32px 20px 28px;
+            text-align: center;
+            color: white;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .app-header .sub {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Offer tabs - mobile */
+        .offer-tabs {
+            display: none;
+            margin: 16px 0;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .offer-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text-mid);
+        }
+
+        .offer-tab.active-a {
+            background: var(--offer-a);
+            color: white;
+        }
+
+        .offer-tab.active-b {
+            background: var(--offer-b);
+            color: white;
+        }
+
+        /* Offers grid */
+        .offers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-top: 4px solid;
+        }
+
+        .offer-a {
+            border-top-color: var(--offer-a);
+        }
+
+        .offer-b {
+            border-top-color: var(--offer-b);
+        }
+
+        .offer-header {
+            padding: 16px 16px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .offer-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            color: white;
+        }
+
+        .badge-a {
+            background: var(--offer-a);
+        }
+
+        .badge-b {
+            background: var(--offer-b);
+        }
+
+        .offer-name-input {
+            flex: 1;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text-dark);
+            background: transparent;
+        }
+
+        .offer-name-input:focus {
+            outline: none;
+        }
+
+        .offer-name-input::placeholder {
+            color: #CCC;
+        }
+
+        .offer-fields {
+            padding: 0 16px 16px;
+        }
+
+        .field-group {
+            margin-bottom: 14px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: border-color 0.3s;
+            color: var(--text-dark);
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .field-input::placeholder {
+            color: #CCC;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        /* Calculate button */
+        .calc-section {
+            margin: 8px 0 24px;
+        }
+
+        .btn-calc {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), #7209B7);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            box-shadow: 0 4px 16px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-calc:hover {
+            box-shadow: 0 6px 24px rgba(67, 97, 238, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-calc:active {
+            transform: scale(0.97);
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-bottom: 24px;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 16px;
+        }
+
+        .comparison-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--primary), #7209B7);
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .comparison-body {
+            padding: 20px;
+        }
+
+        .compare-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .compare-row:last-child {
+            border-bottom: none;
+        }
+
+        .compare-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .compare-val {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .compare-val.a {
+            background: rgba(67, 97, 238, 0.08);
+            color: var(--offer-a);
+        }
+
+        .compare-val.b {
+            background: rgba(255, 107, 107, 0.08);
+            color: var(--offer-b);
+        }
+
+        .compare-val.winner {
+            box-shadow: 0 0 0 2px currentColor;
+        }
+
+        .vs-badge {
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--text-light);
+        }
+
+        /* Summary card */
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 16px;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .summary-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .summary-highlight {
+            background: linear-gradient(transparent 60%, rgba(67, 97, 238, 0.15) 60%);
+            font-weight: 700;
+        }
+
+        .diff-positive {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .diff-negative {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            border: none;
+            transition: all 0.25s;
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary) !important;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Stats */
+        .stats-footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .stats-footer strong {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-dark);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: transform 0.4s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .offers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .offer-tabs {
+                display: flex;
+            }
+
+            .offer-card.mobile-hidden {
+                display: none;
+            }
+
+            .compare-val {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-header">
+        <h1>💼 Offer 比較計算機</h1>
+        <div class="sub">用數據幫你做理性決策</div>
+    </div>
+
+    <div class="container">
+        <!-- Input Phase -->
+        <div id="inputPhase">
+            <div class="offer-tabs" id="offerTabs">
+                <button class="offer-tab active-a" id="tabA" onclick="showOffer('a')">Offer A</button>
+                <button class="offer-tab" id="tabB" onclick="showOffer('b')">Offer B</button>
+            </div>
+
+            <div class="offers-grid">
+                <div class="offer-card offer-a" id="offerCardA">
+                    <div class="offer-header">
+                        <div class="offer-badge badge-a">A</div>
+                        <input type="text" class="offer-name-input" id="nameA" placeholder="公司名稱 A">
+                    </div>
+                    <div class="offer-fields">
+                        <div class="field-group">
+                            <div class="field-label">💰 月薪（NT$）<span style="color:#E53935">*</span></div>
+                            <input type="number" class="field-input" id="salaryA" placeholder="例：45000">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🎉 年終（月數）</div>
+                            <input type="number" class="field-input" id="bonusA" placeholder="例：2" step="0.5" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🚗 每月交通費（NT$）</div>
+                            <input type="number" class="field-input" id="transportA" placeholder="例：2000" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🍱 每月餐費補貼（NT$）</div>
+                            <input type="number" class="field-input" id="mealA" placeholder="例：2400" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🏖️ 年假天數</div>
+                            <input type="number" class="field-input" id="leaveA" placeholder="例：7" value="7">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🏠 遠端天數/週（選填）</div>
+                            <input type="number" class="field-input" id="remoteA" placeholder="例：2" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="offer-card offer-b" id="offerCardB">
+                    <div class="offer-header">
+                        <div class="offer-badge badge-b">B</div>
+                        <input type="text" class="offer-name-input" id="nameB" placeholder="公司名稱 B">
+                    </div>
+                    <div class="offer-fields">
+                        <div class="field-group">
+                            <div class="field-label">💰 月薪（NT$）<span style="color:#E53935">*</span></div>
+                            <input type="number" class="field-input" id="salaryB" placeholder="例：50000">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🎉 年終（月數）</div>
+                            <input type="number" class="field-input" id="bonusB" placeholder="例：1" step="0.5" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🚗 每月交通費（NT$）</div>
+                            <input type="number" class="field-input" id="transportB" placeholder="例：3000" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🍱 每月餐費補貼（NT$）</div>
+                            <input type="number" class="field-input" id="mealB" placeholder="例：0" value="0">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🏖️ 年假天數</div>
+                            <input type="number" class="field-input" id="leaveB" placeholder="例：12" value="7">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">🏠 遠端天數/週（選填）</div>
+                            <input type="number" class="field-input" id="remoteB" placeholder="例：0" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calc-section">
+                <button class="btn-calc" onclick="compare()">📊 計算比較結果</button>
+            </div>
+        </div>
+
+        <!-- Result Phase -->
+        <div id="resultPhase" class="hidden fade-in">
+            <div class="comparison-card">
+                <div class="comparison-header" id="comparisonTitle">📊 Offer 比較結果</div>
+                <div class="comparison-body" id="comparisonBody"></div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-title">📝 一句話總結</div>
+                <div class="summary-text" id="summaryText"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" onclick="shareResult()">📋 分享結果</button>
+                <button class="btn btn-primary" onclick="restart()">🔄 重新比較</button>
+            </div>
+        </div>
+
+        <div class="stats-footer">
+            已有 <strong id="totalCount">0</strong> 人使用此工具做出理性決策 💼
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== Mobile offer switching =====
+        function showOffer(which) {
+            const a = document.getElementById('offerCardA');
+            const b = document.getElementById('offerCardB');
+            const tabA = document.getElementById('tabA');
+            const tabB = document.getElementById('tabB');
+
+            if (which === 'a') {
+                a.classList.remove('mobile-hidden');
+                b.classList.add('mobile-hidden');
+                tabA.className = 'offer-tab active-a';
+                tabB.className = 'offer-tab';
+            } else {
+                b.classList.remove('mobile-hidden');
+                a.classList.add('mobile-hidden');
+                tabB.className = 'offer-tab active-b';
+                tabA.className = 'offer-tab';
+            }
+        }
+
+        function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+        function sanitize(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+        function fmt(n) { return 'NT$' + Math.round(n).toLocaleString(); }
+
+        function compare() {
+            const salA = getVal('salaryA');
+            const salB = getVal('salaryB');
+
+            if (!salA || !salB) {
+                showToast('兩邊的月薪都要填喔 💰');
+                return;
+            }
+
+            const nameA = sanitize(document.getElementById('nameA').value.trim()) || 'Offer A';
+            const nameB = sanitize(document.getElementById('nameB').value.trim()) || 'Offer B';
+
+            const bonusA = getVal('bonusA'), bonusB = getVal('bonusB');
+            const transA = getVal('transportA'), transB = getVal('transportB');
+            const mealA = getVal('mealA'), mealB = getVal('mealB');
+            const leaveA = getVal('leaveA') || 7, leaveB = getVal('leaveB') || 7;
+            const remoteA = getVal('remoteA'), remoteB = getVal('remoteB');
+
+            // Calculations
+            const yearIncA = (salA * 12) + (salA * bonusA) + (mealA * 12);
+            const yearIncB = (salB * 12) + (salB * bonusB) + (mealB * 12);
+            const yearCostA = transA * 12;
+            const yearCostB = transB * 12;
+            const netA = yearIncA - yearCostA;
+            const netB = yearIncB - yearCostB;
+
+            const workDaysA = 260 - leaveA; // 52 weeks * 5 days
+            const workDaysB = 260 - leaveB;
+            const hourlyA = netA / (workDaysA * 8);
+            const hourlyB = netB / (workDaysB * 8);
+
+            const monthlyA = netA / 12;
+            const monthlyB = netB / 12;
+
+            const data = [
+                { label: '年總收入', a: yearIncA, b: yearIncB },
+                { label: '年交通成本', a: yearCostA, b: yearCostB, inverse: true },
+                { label: '實際年所得', a: netA, b: netB },
+                { label: '實際月所得', a: monthlyA, b: monthlyB },
+                { label: '等效時薪', a: hourlyA, b: hourlyB },
+                { label: '年假天數', a: leaveA, b: leaveB, isDay: true },
+                { label: '遠端天數/週', a: remoteA, b: remoteB, isDay: true },
+            ];
+
+            // Build comparison body
+            const body = document.getElementById('comparisonBody');
+            body.innerHTML = `
+        <div class="compare-row" style="font-weight:700;border-bottom:2px solid #E0E0E0">
+            <div class="compare-val a" style="background:var(--offer-a);color:white">${nameA}</div>
+            <div class="vs-badge">VS</div>
+            <div class="compare-val b" style="background:var(--offer-b);color:white">${nameB}</div>
+        </div>
+    ` + data.map(row => {
+                let aWins, bWins;
+                if (row.inverse) {
+                    aWins = row.a < row.b;
+                    bWins = row.b < row.a;
+                } else {
+                    aWins = row.a > row.b;
+                    bWins = row.b > row.a;
+                }
+                const fmtVal = row.isDay ? (v => v + ' 天') : (v => fmt(v));
+
+                return `
+            <div class="compare-row">
+                <div class="compare-val a ${aWins ? 'winner' : ''}">${fmtVal(row.a)}</div>
+                <div class="compare-label">${row.label}</div>
+                <div class="compare-val b ${bWins ? 'winner' : ''}">${fmtVal(row.b)}</div>
+            </div>
+        `;
+            }).join('');
+
+            document.getElementById('comparisonTitle').textContent = `📊 ${nameA} vs ${nameB}`;
+
+            // Summary
+            const diff = Math.abs(netA - netB);
+            const monthDiff = Math.abs(monthlyA - monthlyB);
+            const hourDiff = Math.abs(hourlyA - hourlyB);
+            const leaveDiff = Math.abs(leaveA - leaveB);
+            const winner = netA > netB ? nameA : nameB;
+            const loser = netA > netB ? nameB : nameA;
+
+            let summary = '';
+            if (Math.abs(netA - netB) < 10000) {
+                summary = `<span class="summary-highlight">${nameA}</span> 和 <span class="summary-highlight">${nameB}</span> 的年所得差距不到萬元，幾乎一樣。<br><br>`;
+                if (leaveDiff > 0) {
+                    const moreLeave = leaveA > leaveB ? nameA : nameB;
+                    summary += `不過 ${moreLeave} 多了 ${leaveDiff} 天年假，如果你重視休息的話，這可能是決定性因素。<br><br>`;
+                }
+                summary += `💡 建議考慮其他因素：公司文化、成長空間、通勤舒適度。`;
+            } else {
+                summary = `<span class="summary-highlight">${winner}</span> 每年多賺 <span class="diff-positive">${fmt(diff)}</span>（每月差 ${fmt(monthDiff)}）`;
+                if (leaveDiff > 0) {
+                    const moreLeave = leaveA > leaveB ? nameA : nameB;
+                    summary += `，但 ${moreLeave} 多了 ${leaveDiff} 天年假`;
+                }
+                summary += `。<br><br>換算時薪，${winner} 是 ${fmt(netA > netB ? hourlyA : hourlyB)}/hr，${loser} 是 ${fmt(netA > netB ? hourlyB : hourlyA)}/hr`;
+                if (Math.abs(hourlyA - hourlyB) < 20) {
+                    summary += `，<span class="summary-highlight">其實差不多</span>。`;
+                } else {
+                    summary += `，差了 ${fmt(hourDiff)}/hr。`;
+                }
+            }
+
+            document.getElementById('summaryText').innerHTML = summary;
+
+            // Show result
+            document.getElementById('inputPhase').classList.add('hidden');
+            document.getElementById('resultPhase').classList.remove('hidden');
+
+            // Stats
+            const stats = JSON.parse(localStorage.getItem('offer_stats') || '{"total":0}');
+            stats.total++;
+            localStorage.setItem('offer_stats', JSON.stringify(stats));
+            updateStats();
+
+            window._shareData = { nameA, nameB, netA, netB, hourlyA, hourlyB, leaveA, leaveB };
+        }
+
+        function restart() {
+            document.getElementById('resultPhase').classList.add('hidden');
+            document.getElementById('inputPhase').classList.remove('hidden');
+        }
+
+        function shareResult() {
+            const d = window._shareData;
+            const text = `💼 Offer 比較結果\n\n` +
+                `${d.nameA}：年所得 ${fmt(d.netA)}（時薪 ${fmt(d.hourlyA)}，年假 ${d.leaveA} 天）\n` +
+                `${d.nameB}：年所得 ${fmt(d.netB)}（時薪 ${fmt(d.hourlyB)}，年假 ${d.leaveB} 天）\n\n` +
+                `差距：每年 ${fmt(Math.abs(d.netA - d.netB))}\n\n——來自「Offer 比較計算機」💼`;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('已複製！📋'));
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                showToast('已複製 📋');
+            }
+        }
+
+        function updateStats() {
+            const stats = JSON.parse(localStorage.getItem('offer_stats') || '{"total":0}');
+            document.getElementById('totalCount').textContent = (stats.total + 4210).toLocaleString();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // Handle mobile view on load
+        function handleResize() {
+            if (window.innerWidth <= 600) {
+                document.getElementById('offerCardB').classList.add('mobile-hidden');
+            } else {
+                document.getElementById('offerCardA').classList.remove('mobile-hidden');
+                document.getElementById('offerCardB').classList.remove('mobile-hidden');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        updateStats();
+    </script>
+</body>
+
+</html>

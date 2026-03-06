@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你今天的努力換算成錢 💰 | 廢人計價器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #E8F5E9;
+            color: #1B5E20;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px dashed #A5D6A7;
+            padding-bottom: 20px;
+        }
+
+        .tag {
+            display: block;
+            padding: 12px;
+            background: #F1F8E9;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            font-weight: bold;
+        }
+
+        .tag.selected {
+            background: #C8E6C9;
+            border-color: #4CAF50;
+        }
+
+        .tag span {
+            color: #555;
+            font-size: 14px;
+            float: right;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 900;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .total-box {
+            background: #1B5E20;
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #total {
+            font-size: 48px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+
+        .conc {
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="font-size: 28px;">💰 你今天的狗屁倒灶換算成錢</h1>
+            <p>其實你真的很有價值，只是老闆眼瞎</p>
+        </div>
+
+        <div id="step1">
+            <h3 style="margin-bottom: 12px;">勾選你今天完成的「偉大成就」：</h3>
+            <div id="tags"></div>
+            <button class="btn" onclick="calc()">結算我的身價</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div class="total-box">
+                <div>今日總市值</div>
+                <div id="total">NT$ 0</div>
+            </div>
+            <div class="conc" id="conc"></div>
+            <button class="btn" style="background:#2196F3;" onclick="share()">📋 拿去逼老闆加薪 (複製報表)</button>
+            <button class="btn" style="background:#9E9E9E; margin-top:10px" onclick="location.reload()">🔄 重新估價</button>
+        </div>
+    </div>
+
+    <script>
+        const tags = [
+            { t: '帶薪拉屎 30 分鐘', p: 1500 },
+            { t: '對著螢幕假裝打字其實在發呆', p: 800 },
+            { t: '成功忍住沒把熱咖啡潑主管臉上', p: 50000 },
+            { t: '熟練地把責任推給別人', p: 3000 },
+            { t: '發明了一種新的嘆氣方式', p: 100 },
+            { t: '把密碼輸入錯三次被鎖帳號', p: -500 },
+            { t: '按掉 5 個鬧鐘才肯起床', p: 200 },
+            { t: '在捷運上居然搶到座位', p: 5000 },
+            { t: '聽別人講智障話還要點頭附和', p: 10000 },
+            { t: '下午茶自己點了一杯純茶 (沒加珍珠)', p: -50 }
+        ];
+
+        let selected = new Set();
+        const tg = document.getElementById('tags');
+        tags.forEach((tag, i) => {
+            let el = document.createElement('div');
+            el.className = 'tag'; el.innerHTML = `${tag.t} <span>NT$ ${tag.p}</span>`;
+            el.onclick = () => {
+                if (selected.has(i)) { selected.delete(i); el.classList.remove('selected'); }
+                else { selected.add(i); el.classList.add('selected'); }
+            };
+            tg.appendChild(el);
+        });
+
+        function calc() {
+            let sum = 0; selected.forEach(i => sum += tags[i].p);
+            document.getElementById('total').textContent = 'NT$ ' + sum.toLocaleString();
+
+            let txt = '';
+            if (sum <= 0) txt = '你今天市值 0 元。但不要灰心，連垃圾都有回收價，你卻連回收價都沒有。這是一種超脫物外的境界啊！';
+            else if (sum < 5000) txt = `你今天值 $${sum.toLocaleString()}，大概剛好夠付你未來的神經科掛號費加幾杯珍奶。<br>老闆只付你幾百塊，根本是詐欺！`;
+            else if (sum < 50000) txt = `哇塞！原來你這麼值錢！你居然能創造 $${sum.toLocaleString()} 的情緒勞動價值！<br>建議你馬上把這份報表摔在老闆桌上，然後霸氣叫他去買雞排。`;
+            else txt = `驚為天人！台灣的 GDP 沒你真的會垮！你今天的努力價值竟然高達 $${sum.toLocaleString()}！<br>這筆錢夠買好幾千根香蕉了，建議直接退化成猴子，每天吃香蕉快樂多了，幹嘛要在這裡上班？`;
+
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('conc').innerHTML = txt;
+
+            window.resText = `💰 【廢人計價器】報表\n\n我的今日防禦力總值：NT$ ${sum.toLocaleString()}\n精算師分析：${txt.replace(/<br>/g, '\n')}\n\n👉 看看你值幾個便當：[請貼上工具網址]`;
+        }
+
+        function share() {
+            navigator.clipboard.writeText(window.resText).then(() => alert('已複製，去跟世界討債吧！'));
+        }
+    </script>
+</body>
+
+</html>

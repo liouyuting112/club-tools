@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天要幾點睡才不算太晚 🌙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #0F0C29;
+            color: #FFF;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        input[type=time] {
+            padding: 15px;
+            font-size: 24px;
+            border-radius: 10px;
+            border: none;
+            background: #222;
+            color: #00F0FF;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #7000FF, #00F0FF);
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .doom-text {
+            font-size: 40px;
+            color: #FF003C;
+            font-weight: 900;
+            margin: 20px 0;
+            text-shadow: 0 0 10px red;
+        }
+
+        .msg {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #CCC;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="step1">
+            <h1 style="color:#00F0FF; margin-bottom:10px;">🌙 幾點睡才不會死？</h1>
+            <p style="color:#888; font-size:14px; margin-bottom:30px;">輸入你明天打算幾點起床面對絕望的世界</p>
+
+            <label style="display:block;font-weight:bold;">⏰ 明天不得不醒來的時間：</label>
+            <input type="time" id="wake" value="07:30">
+
+            <button class="btn" onclick="calc()">認真幫我算算看</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div class="doom-text">你 來 不 及 了</div>
+            <div class="msg" id="msg"></div>
+            <button class="btn" style="background: transparent; border: 2px solid #555;"
+                onclick="location.reload()">再騙自己一次</button>
+        </div>
+    </div>
+    <script>
+        function calc() {
+            const msgs = [
+                "就算你現在立刻表演一秒入睡，並且時空倒流，你還是來不及。\n你的肝正在角落寫辭職信，預計明天早上九點就會遞交。",
+                "建議直接去地府投胎，下輩子重新排隊，記得在投胎選單裡勾選『不需要睡覺的物種』，比如蟑螂就很適合你。",
+                "你以為你還活著？少騙人了！其實你已經是一具被咖啡因操控、沒有靈魂的行屍走肉了。",
+                "來不及了啦！既然都已經這麼慘了，不如打開 Netflix 再看三集影集吧！反正明天都是要死不活的，不如死得有尊嚴一點！",
+                "神仙也救不了你。請把明天早上的眼淚留著，因為你起床照鏡子看到黑眼圈的時候，會非常需要。"
+            ];
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('msg').innerHTML = msgs[Math.floor(Math.random() * msgs.length)].replace(/\n/g, '<br><br>');
+        }
+    </script>
+</body>
+
+</html>
