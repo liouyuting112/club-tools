@@ -120,7 +120,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>🍽️ 你今天值得吃大餐嗎？</h1>
+            <h1>🍽️ 你今天配吃大餐嗎？</h1>
             <p>這是一個沒有科學根據的胡說八道系統</p>
         </div>
 
@@ -142,23 +142,31 @@
     <div class="toast" id="toast">已複製，快去貼給朋友笑！</div>
 
     <script>
-        const tags = [
+        // Pool of ridiculous tasks for randomness
+        const allTags = [
             { t: '呼吸了超過 100 次', s: 1 },
             { t: '成功把垃圾丟進垃圾桶', s: 2 },
-            { t: '假排隊真滑手機', s: -1 },
+            { t: '假裝排隊其實在滑手機', s: -1 },
             { t: '被路邊的黑狗狂吠', s: 3 },
-            { t: '差點跌倒但裝作在跳舞', s: 4 },
+            { t: '差點跌倒但裝作在跳街舞', s: 4 },
             { t: '偷看前任限動', s: -2 },
             { t: '在老闆背後瘋狂翻白眼', s: 5 },
             { t: '深情地望著天花板發呆', s: 1 },
             { t: '成功憋住了一個超響的屁', s: 5 },
             { t: '喝水莫名其妙嗆到', s: 2 },
-            { t: '今天什麼都沒做，只管活著', s: -5 }
+            { t: '跟 Siri 吵架還吵輸', s: 4 },
+            { t: '忘記帶鑰匙在門口冥想', s: 3 },
+            { t: '假裝認真聽懂了同事的廢話', s: 4 },
+            { t: '用腳趾成功撿起地上的襪子', s: 6 },
+            { t: '什麼都沒做，只管活著', s: -5 }
         ];
 
+        // Randomly select 8 tags to display, making it different every time
+        let activeTags = [...allTags].sort(() => 0.5 - Math.random()).slice(0, 8);
         let selected = new Set();
         const tg = document.getElementById('tags');
-        tags.forEach((tag, i) => {
+
+        activeTags.forEach((tag, i) => {
             let el = document.createElement('div');
             el.className = 'tag'; el.textContent = tag.t;
             el.onclick = () => {
@@ -168,22 +176,62 @@
             tg.appendChild(el);
         });
 
+        // Ridiculous result banks to prevent easily guessing the outcome
+        const resultsDB = {
+            negative: [
+                {
+                    stars: '⭐ 負一萬星', name: '吸空氣大師', txt:
+                        ['你今天的努力只夠在路邊喝西北風。\n去巷口便利商店買個即期御飯糰，還不准請店員加熱。你的細胞都在為你感到羞恥。',
+                            '你今天根本沒有消耗到卡路里吧？建議你光合作用就好。\n今天晚餐：空氣兩口，白開水一杯。不能再多了。',
+                            '連地球自轉都比你還努力。\n去超商拿關東煮的湯泡科學麵，這就是你今天的極限了。']
+                },
+            ],
+            low: [
+                {
+                    stars: '⭐⭐ 半顆星', name: '平庸的卵石', txt:
+                        ['你成功扮演了一個路人甲！表現平淡無奇，非常適合吃一碗加了滷蛋的陽春麵。\n記住，滷蛋不能切，這是你今天最大的奢侈。',
+                            '你的表現就跟白開水一樣無聊。\n勉強允許你吃個雞腿便當，但你不配擁有多加的滷汁。',
+                            '你今天的努力程度介於「活著」跟「發酵的麵團」之間。\n去買個麥當勞 1+1 吧，你只配得上 50 塊的快樂。']
+                }
+            ],
+            mid: [
+                {
+                    stars: '⭐⭐⭐⭐ 四星', name: '苟延殘喘の戰士', txt:
+                        ['天哪，經歷了這些鳥事你竟然還活著！這簡直是醫學奇蹟！\n這點委屈不吃個火鍋怎麼對得起自己？吃！都吃！讓卡路里撫慰你的靈魂！',
+                            '你今天真是辛苦了（雖然一半是被自己蠢哭的）。\n去吃頓燒肉吃到飽吧，把對這世界的不滿通通吞下去！',
+                            '你的精神力已經見底了，急需大量碳水化合物急救。\n允許你點一份起司瀑布披薩，再加一杯全糖珍奶壓壓驚！']
+                }
+            ],
+            high: [
+                {
+                    stars: '🌟🌟🌟🌟🌟 爆裂五星', name: '拯救宇宙的英雄', txt:
+                        ['太誇張了，你今天根本是超人！地球沒有爆炸都是因為你在撐著！\n去吃和牛吃到飽！今晚就算刷爆信用卡，就算明天破產，你也值得這一切榮耀！',
+                            '你今天的經歷已經足以拍成好萊塢悲慘世界電影了。\n立刻去訂全城最貴的法式餐廳！吃掉半個月薪水也沒關係，這是你應得的戰損補貼！',
+                            '經過精密的廢言運算，你今天的努力值突破了碳基生物的極限。\n去吃滿漢全席吧！連骨頭都不要吐出來的那種！']
+                }
+            ]
+        };
+
         function calc() {
             if (selected.size === 0) return alert('你連點個按鈕都懶，活該吃土！');
-            let s = 0; selected.forEach(i => s += tags[i].s);
-            let r = {};
-            if (s < 0) r = { stars: '⭐ 負一萬星', name: '吸空氣大師', txt: '你今天的努力只夠在路邊喝西北風。\n去巷口便利商店買個即期御飯糰，還不准請店員加熱。你的細胞都在為你感到羞恥。' };
-            else if (s < 5) r = { stars: '⭐⭐ 半顆星', name: '平庸的卵石', txt: '你成功扮演了一個路人甲！表現平淡無奇，非常適合吃一碗加了滷蛋的陽春麵。\n記住，滷蛋不能切，這是你今天最大的奢侈。' };
-            else if (s < 10) r = { stars: '⭐⭐⭐⭐ 四星', name: '苟延殘喘の戰士', txt: '天哪，經歷了這些鳥事你竟然還活著！這簡直是醫學奇蹟！\n這點委屈不吃個火鍋怎麼對得起自己？吃！都吃！讓卡路里撫慰你的靈魂！' };
-            else r = { stars: '🌟🌟🌟🌟🌟 爆裂五星', name: '拯救宇宙的英雄', txt: '太誇張了，你今天根本是超人！地球沒有爆炸都是因為你在撐著！\n去吃和牛吃到飽！今晚就算刷爆信用卡，就算明天破產，你也值得這一切榮耀！' };
+            let s = 0; selected.forEach(i => s += activeTags[i].s);
+
+            let pool;
+            if (s < 0) pool = resultsDB.negative[0];
+            else if (s < 5) pool = resultsDB.low[0];
+            else if (s < 10) pool = resultsDB.mid[0];
+            else pool = resultsDB.high[0];
+
+            // Pick a random text from the array
+            let resTxt = pool.txt[Math.floor(Math.random() * pool.txt.length)];
 
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('stars').textContent = r.stars;
-            document.getElementById('ratingName').textContent = r.name;
-            document.getElementById('desc').innerHTML = r.txt.replace(/\n/g, '<br>');
+            document.getElementById('stars').textContent = pool.stars;
+            document.getElementById('ratingName').textContent = pool.name;
+            document.getElementById('desc').innerHTML = resTxt.replace(/\n/g, '<br><br>');
 
-            window.resText = `🍽️ 【大餐資格評估局】\n\n我的今日防禦力：${r.name}\n系統判斷：${r.txt.replace(/\n/g, ' ')}\n\n👉 誰請我吃一頓：[請貼上工具網址]`;
+            window.resText = `🍽️ 【大餐資格評估局】\n\n我的今日防禦力：${pool.name}\n系統判斷：${resTxt.replace(/\n/g, ' ')}\n\n👉 誰請我吃一頓：https://github.com/liouyuting112/club-tools`;
         }
 
         function share() {

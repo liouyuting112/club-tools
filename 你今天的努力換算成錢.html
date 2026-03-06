@@ -123,22 +123,31 @@
     </div>
 
     <script>
-        const tags = [
-            { t: '帶薪拉屎 30 分鐘', p: 1500 },
+        // A much larger pool of ridiculous items to draw from randomly
+        const allTasks = [
+            { t: '帶薪拉屎超過 30 分鐘', p: 1500 },
             { t: '對著螢幕假裝打字其實在發呆', p: 800 },
             { t: '成功忍住沒把熱咖啡潑主管臉上', p: 50000 },
-            { t: '熟練地把責任推給別人', p: 3000 },
-            { t: '發明了一種新的嘆氣方式', p: 100 },
+            { t: '熟練地把黑鍋推給實習生', p: 3000 },
+            { t: '發明了一種新的長嘆氣方式', p: 100 },
             { t: '把密碼輸入錯三次被鎖帳號', p: -500 },
             { t: '按掉 5 個鬧鐘才肯起床', p: 200 },
-            { t: '在捷運上居然搶到座位', p: 5000 },
+            { t: '在捷運上居然搶到博愛座', p: 5000 },
             { t: '聽別人講智障話還要點頭附和', p: 10000 },
-            { t: '下午茶自己點了一杯純茶 (沒加珍珠)', p: -50 }
+            { t: '下午茶自己點了一杯純水喝', p: -50 },
+            { t: '不小心跟主管對到眼並維持假笑', p: 4000 },
+            { t: '幻想中樂透的第一天計劃', p: 1000 },
+            { t: '把滑鼠點壞的機率提升了', p: 50 },
+            { t: '成功消耗了一包公司衛生紙', p: 10 },
+            { t: '開會時靈魂出竅了一小時', p: 8000 }
         ];
 
+        // Pick 8 random tasks for this session
+        let activeTasks = [...allTasks].sort(() => 0.5 - Math.random()).slice(0, 8);
         let selected = new Set();
         const tg = document.getElementById('tags');
-        tags.forEach((tag, i) => {
+
+        activeTasks.forEach((tag, i) => {
             let el = document.createElement('div');
             el.className = 'tag'; el.innerHTML = `${tag.t} <span>NT$ ${tag.p}</span>`;
             el.onclick = () => {
@@ -148,21 +157,44 @@
             tg.appendChild(el);
         });
 
+        // Ridiculous conclusions pool
+        const conclusions = {
+            zero: [
+                '你今天市值 0 元。但不要灰心，連垃圾都有回收價，你卻連回收價都沒有。這是一種超脫物外的境界啊！',
+                '你連一點點努力的痕跡都沒有。老闆看到你這個數據大概會氣到中風，去拿個紙箱裝自己吧。'
+            ],
+            low: [
+                '你今天大概剛好夠付你未來的神經科掛號費加幾杯珍奶。\n老闆只付你幾百塊，根本是詐欺！',
+                '算了吧，這點錢連幫財神爺點個燈都不夠。\n你今天創造的價值就跟便利商店的塑膠袋一樣，勉強可用但用完即丟。'
+            ],
+            mid: [
+                '哇塞！原來你這麼值錢！你居然能創造這麼高的情緒勞動價值！\n建議你馬上把這份報表摔在老闆桌上，然後霸氣叫他去買雞排。',
+                '你的精神賠償金正在急速飆高！\n你今天不是來上班的，你是來修行渡劫的。請主管立刻給你磕頭。'
+            ],
+            high: [
+                '驚為天人！台灣的 GDP 沒你真的會垮！你今天的努力價值竟然高出天際！\n建議直接退化成猴子，每天吃香蕉快樂多了，幹嘛要在這裡上班？',
+                '你的身價已經比巴菲特的股票還會漲！\n馬斯克沒有來挖角你簡直是人類文明的損失。請現在就打卡下班！'
+            ]
+        };
+
         function calc() {
-            let sum = 0; selected.forEach(i => sum += tags[i].p);
+            let sum = 0; selected.forEach(i => sum += activeTasks[i].p);
             document.getElementById('total').textContent = 'NT$ ' + sum.toLocaleString();
 
-            let txt = '';
-            if (sum <= 0) txt = '你今天市值 0 元。但不要灰心，連垃圾都有回收價，你卻連回收價都沒有。這是一種超脫物外的境界啊！';
-            else if (sum < 5000) txt = `你今天值 $${sum.toLocaleString()}，大概剛好夠付你未來的神經科掛號費加幾杯珍奶。<br>老闆只付你幾百塊，根本是詐欺！`;
-            else if (sum < 50000) txt = `哇塞！原來你這麼值錢！你居然能創造 $${sum.toLocaleString()} 的情緒勞動價值！<br>建議你馬上把這份報表摔在老闆桌上，然後霸氣叫他去買雞排。`;
-            else txt = `驚為天人！台灣的 GDP 沒你真的會垮！你今天的努力價值竟然高達 $${sum.toLocaleString()}！<br>這筆錢夠買好幾千根香蕉了，建議直接退化成猴子，每天吃香蕉快樂多了，幹嘛要在這裡上班？`;
+            let txtPool;
+            if (sum <= 0) txtPool = conclusions.zero;
+            else if (sum < 5000) txtPool = conclusions.low;
+            else if (sum < 50000) txtPool = conclusions.mid;
+            else txtPool = conclusions.high;
+
+            // Pick a random conclusion text
+            let finalTxt = txtPool[Math.floor(Math.random() * txtPool.length)];
 
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('conc').innerHTML = txt;
+            document.getElementById('conc').innerHTML = finalTxt.replace(/\n/g, '<br><br>');
 
-            window.resText = `💰 【廢人計價器】報表\n\n我的今日防禦力總值：NT$ ${sum.toLocaleString()}\n精算師分析：${txt.replace(/<br>/g, '\n')}\n\n👉 看看你值幾個便當：[請貼上工具網址]`;
+            window.resText = `💰 【廢人計價器】報表\n\n我的今日防禦力總值：NT$ ${sum.toLocaleString()}\n精算師分析：${finalTxt.replace(/\n/g, ' ')}\n\n👉 看看你值幾個便當：https://github.com/liouyuting112/club-tools`;
         }
 
         function share() {
